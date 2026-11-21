@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  namespace: downloads
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      securityContext:
+        fsGroup: 2000
+        fsGroupChangePolicy: OnRootMismatch
+        sysctls:
+          - name: net.ipv4.conf.all.src_valid_mark
+            value: "1"
+      # Kubernetes Native Sidecar (K8s 1.29+):
+      # The startupProbe blocks the main app container from starting until
+      # the nftables killswitch and WireGuard tunnel are verified up.
+      initContainers:
+        - name: kube-vpn
+          image: ghcr.io/t0ggl/kube-vpn:v0.1.0
+          restartPolicy: Always
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_ADMIN
+          env:
+            - name: BYPASS_SUBNETS
+              value: "10.244.0.0/16,10.96.0.0/12,192.168.0.0/16,100.64.0.0/10"
+            - name: POD_INPUT_PORTS
+              value: "8080/tcp"
+            - name: VPN_INPUT_PORTS
+              value: "9514"
+          startupProbe:
+            httpGet:
+              path: /readyz
+              port: 9999
+            periodSeconds: 2
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9999
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: vpn-config
+              mountPath: /etc/wireguard
+              readOnly: true
+      containers:
+        - name: qbittorrent
+          image: ghcr.io/home-operations/qbittorrent:5.3.0
+          ports:
+            - containerPort: 8080
+          securityContext:
+            runAsUser: 2000
+            runAsGroup: 2000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: vpn-config
+          secret:
+            secretName: qbittorrent-vpn
+            items:
+              - key: wg0.conf
+                path: wg0.conf
+        - name: config
+          persistentVolumeClaim:
+            claimName: qbittorrent-data
+        - name: tmp
+          emptyDir: {}

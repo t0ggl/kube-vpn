@@ -1,0 +1,8 @@
+/kube-vpn
+/bin/
+/dist/
+*.test
+*.out
+coverage.txt
+.env
+wg0.conf
