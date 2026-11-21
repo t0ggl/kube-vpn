@@ -111,7 +111,7 @@ func loadFromLookup(lookup func(string) (string, bool)) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	cfg.EndpointRefreshInterval, err = parseDuration(get("ENDPOINT_REFRESH_INTERVAL", "5m"), "ENDPOINT_REFRESH_INTERVAL")
+	cfg.EndpointRefreshInterval, err = parseDuration(get("ENDPOINT_REFRESH_INTERVAL", "0s"), "ENDPOINT_REFRESH_INTERVAL")
 	if err != nil {
 		return nil, err
 	}

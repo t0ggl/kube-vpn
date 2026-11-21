@@ -103,7 +103,7 @@ All settings are configured via environment variables:
 | `HEALTH_CHECK_TARGET` | `1.1.1.1:443` | Connectivity check target (`host:port` TCP, `http(s)://...`, or `none`). |
 | `HEALTH_CHECK_INTERVAL` | `30s` | Interval between tunnel health probes. |
 | `HEALTH_CHECK_TIMEOUT` | `5s` | Timeout per connectivity probe. |
-| `ENDPOINT_REFRESH_INTERVAL` | `5m` | Periodic DNS re-resolution interval for hostname endpoints (`0` = only on failure/stale handshake). |
+| `ENDPOINT_REFRESH_INTERVAL` | `0s` | Optional periodic DNS re-resolution interval for hostname endpoints (`0s` = only re-resolve on health-check failure or stale handshake, recommended for round-robin VPN hostnames). |
 | `HANDSHAKE_STALE_AFTER` | `3m` | Triggers endpoint re-resolution if the latest WireGuard handshake exceeds this age. |
 | `KILLSWITCH_ENABLED` | `true` | Enforce atomic `nftables` (`inet kube_vpn`) default-drop killswitch. |
 | `KILLSWITCH_KEEP_ON_EXIT` | `true` | Leave `inet kube_vpn` killswitch rules in place on `SIGTERM` so sibling containers cannot leak traffic during pod termination. |
