@@ -354,10 +354,11 @@ PersistentKeepalive = 5
 			return strings.TrimSpace(ipOut) == vpnServer2UpIP, ipOut
 		})
 
-		// Confirm /healthz is 200 OK again.
-		if out, err := probeFrom("pod-app", "http://127.0.0.1:9999/healthz"); err != nil {
-			t.Fatalf("/healthz did not recover after live endpoint rotation: %v (%s)", err, out)
-		}
+		// Confirm /healthz recovers to 200 OK on the next probe tick.
+		waitFor(t, 10*time.Second, "/healthz 200 OK after live endpoint rotation", func() (bool, string) {
+			out, err := probeFrom("pod-app", "http://127.0.0.1:9999/healthz")
+			return err == nil, out
+		})
 	})
 
 	// --- Scenario 6: Killswitch persists on exit + idempotent restart in shared Pod netns ---
