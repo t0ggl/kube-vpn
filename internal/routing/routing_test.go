@@ -42,3 +42,12 @@ func TestPodNetworkPrimaryInterface(t *testing.T) {
 		t.Errorf("empty fallback got %s, want eth0", empty.PrimaryInterface())
 	}
 }
+
+func TestRulePrioritiesBeforeMain(t *testing.T) {
+	if RulePrioritySuppressMain >= RulePriorityVPNTable {
+		t.Errorf("RulePrioritySuppressMain (%d) must be < RulePriorityVPNTable (%d)", RulePrioritySuppressMain, RulePriorityVPNTable)
+	}
+	if RulePriorityVPNTable >= 32766 {
+		t.Errorf("RulePriorityVPNTable (%d) must be < Linux default main rule priority (32766)", RulePriorityVPNTable)
+	}
+}

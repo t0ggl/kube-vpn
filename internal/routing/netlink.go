@@ -13,9 +13,11 @@ import (
 
 const (
 	// RulePrioritySuppressMain is the ip rule priority for `lookup main suppress_prefixlength 0`.
-	RulePrioritySuppressMain = 51819
+	// Must be strictly less than Linux's default `main` rule priority (32766).
+	RulePrioritySuppressMain = 10000
 	// RulePriorityVPNTable is the ip rule priority for `not fwmark <mark> lookup <table>`.
-	RulePriorityVPNTable = 51820
+	// Must be greater than RulePrioritySuppressMain and strictly less than 32766.
+	RulePriorityVPNTable = 10001
 )
 
 // DefaultRoute captures the pod's primary CNI interface and default gateway.

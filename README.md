@@ -120,7 +120,28 @@ All settings are configured via environment variables:
 1. **Idempotent Startup Cleanup:** Removes any leftover `wg0` interface and `ip rule` entries for table `51820` / `suppress_prefixlength 0` from prior container restarts in the shared Pod netns.
 2. **Killswitch First:** Installs an atomic `inet kube_vpn` nftables table with `policy drop` on `input`, `output`, and `forward` **before** resolving endpoints or starting WireGuard.
 3. **Zero-Leak Endpoint Rotation:** When a peer's DNS record rotates, `kube-vpn` atomically updates `inet kube_vpn` in a single netlink transaction and updates the WireGuard peer endpoint in-place via `wgctrl` (or in-memory UAPI).
-4. **Policy Routing:** Uses `ip rule` priority `51819` (`lookup main suppress_prefixlength 0`) + priority `51820` (`not fwmark 51820 lookup 51820`), preserving the pod's original CNI default route in `main` for encrypted WireGuard packets and explicit `BYPASS_SUBNETS` / CoreDNS routes.
+4. **Policy Routing:** Uses `ip rule` priority `10000` (`lookup main suppress_prefixlength 0`) + priority `10001` (`not fwmark 51820 lookup 51820`), preserving the pod's original CNI default route in `main` for encrypted WireGuard packets and explicit `BYPASS_SUBNETS` / CoreDNS routes.
+
+## Testing
+
+Run unit tests:
+
+```bash
+go test -v -race ./...
+```
+
+Run end-to-end container integration tests (requires Docker or Podman with `NET_ADMIN` / `nftables` / WireGuard support):
+
+```bash
+go test -tags=integration -v -timeout 5m ./test/integration/...
+```
+
+The integration suite spins up isolated WireGuard server containers, a dynamic DNS container, a paired application container sharing a network namespace with `kube-vpn` (`--read-only`, `--cap-drop=ALL --cap-add=NET_ADMIN`), a bypass service, and a direct-leak target to verify:
+- Tunnel routing & `readOnlyRootFilesystem: true`
+- `BYPASS_SUBNETS`, `POD_INPUT_PORTS`, and `VPN_INPUT_PORTS` enforcement
+- Zero-leak killswitch blocking non-bypass traffic when VPN is up, when VPN goes offline, and after `kube-vpn` exits (`KILLSWITCH_KEEP_ON_EXIT=true`)
+- Live dynamic DNS endpoint rotation with zero container restarts
+- Idempotent `kube-vpn` restart inside the same shared Pod network namespace
 
 ## License
 

@@ -1,0 +1,8 @@
+FROM golang:1.26-alpine AS builder
+WORKDIR /src
+COPY test/integration/helper/main.go ./main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/test-helper ./main.go
+
+FROM alpine:3.21
+COPY --from=builder /out/test-helper /usr/local/bin/test-helper
+ENTRYPOINT ["/usr/local/bin/test-helper"]
