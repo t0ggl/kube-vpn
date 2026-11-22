@@ -34,7 +34,7 @@ jobs:
 
       - name: Run Semgrep SAST
         shell: bash
-        run: ./scripts/sast.sh
+        run: make sast
 
   test:
     name: Test & Vet
@@ -50,10 +50,10 @@ jobs:
           cache: true
 
       - name: Run go vet
-        run: go vet ./...
+        run: make vet
 
       - name: Run unit tests
-        run: go test -v -race -cover ./...
+        run: make test
 
   integration-test:
     name: Container Integration Tests
@@ -70,7 +70,7 @@ jobs:
           cache: true
 
       - name: Run container integration tests
-        run: go test -tags=integration -v -timeout 5m ./test/integration/...
+        run: make test-integration
 
   build-and-push:
     name: Build & Push Container Image
