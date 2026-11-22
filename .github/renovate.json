@@ -17,6 +17,13 @@
   ],
   "packageRules": [
     {
+      "description": "Pin production Dockerfile images by digest and merge after CI passes",
+      "matchManagers": ["dockerfile"],
+      "matchFileNames": ["/^Dockerfile$/"],
+      "pinDigests": true,
+      "platformAutomerge": false
+    },
+    {
       "description": "Group non-major GitHub Actions updates",
       "matchManagers": [
         "github-actions"
