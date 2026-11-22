@@ -27,4 +27,6 @@ COPY --from=builder /out/kube-vpn /kube-vpn
 
 EXPOSE 9999
 
+# Container runs as root by default to manage network interfaces, policy routes, and nftables inside the pod netns.
+# nosemgrep: dockerfile.security.missing-user-entrypoint.missing-user-entrypoint
 ENTRYPOINT ["/kube-vpn"]
