@@ -111,8 +111,7 @@ func (s *Server) handleReadyz(w http.ResponseWriter, _ *http.Request) {
 	s.mu.RUnlock()
 
 	if !ready {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		_, _ = fmt.Fprintf(w, "not ready: %s\n", lastErr)
+		http.Error(w, "not ready: "+lastErr, http.StatusServiceUnavailable)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -126,8 +125,7 @@ func (s *Server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
 	s.mu.RUnlock()
 
 	if !healthy {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		_, _ = fmt.Fprintf(w, "unhealthy: %s\n", lastErr)
+		http.Error(w, "unhealthy: "+lastErr, http.StatusServiceUnavailable)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
