@@ -17,7 +17,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" \
     -o /out/kube-vpn ./cmd/kube-vpn
 
-FROM alpine:3.21 AS certs
+FROM alpine:3.24 AS certs
 RUN apk add --no-cache ca-certificates
 
 FROM scratch
