@@ -16,6 +16,26 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  sast:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.15'
+
+      - name: Install Semgrep
+        shell: bash
+        run: python -m pip install --no-cache-dir semgrep
+
+      - name: Run Semgrep SAST
+        shell: bash
+        run: ./scripts/sast.sh
+
   test:
     name: Test & Vet
     runs-on: ubuntu-latest
@@ -54,7 +74,7 @@ jobs:
 
   build-and-push:
     name: Build & Push Container Image
-    needs: [test, integration-test]
+    needs: [sast, test, integration-test]
     runs-on: ubuntu-latest
     permissions:
       contents: read
