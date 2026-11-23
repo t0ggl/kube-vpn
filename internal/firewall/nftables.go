@@ -172,7 +172,10 @@ func buildOutputRules(table *nftables.Table, chain *nftables.Chain, p Policy) []
 	// 2. Always allow established/related return traffic (e.g. HTTP responses to PodInputPorts).
 	add(matchCtEstablishedRelated()...)
 
-	// 3. Allow ALL outbound traffic going through the WireGuard tunnel interface.
+	// 3. Allow ICMPv6 neighbor discovery / router solicitation essentials on pod interface.
+	add(append(matchOifName(p.PodInterface), matchL4Proto(unix.IPPROTO_ICMPV6)...)...)
+
+	// 4. Allow ALL outbound traffic going through the WireGuard tunnel interface.
 	add(matchOifName(p.WGInterface)...)
 
 	// 4. Allow encrypted WireGuard UDP packets to each resolved peer endpoint on the pod interface.
