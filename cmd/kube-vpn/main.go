@@ -185,7 +185,7 @@ func run(ctx context.Context, cfg *config.Config, logger *slog.Logger) error {
 	)
 
 	// 11. Start HTTP health/status server for Kubernetes startupProbe/readinessProbe/livenessProbe.
-	healthSrv := health.NewServer(cfg.HealthAddr, cfg.WGInterface, tunnel.Stats, logger)
+	healthSrv := health.NewServer(cfg.HealthAddr, version, cfg.WGInterface, tunnel.Stats, logger)
 	healthSrv.SetBackend(tunnel.Backend())
 	if cfg.HealthAddr != "" {
 		if err := healthSrv.Start(); err != nil {
