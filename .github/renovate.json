@@ -3,9 +3,11 @@
   "extends": [
     "config:best-practices"
   ],
-  "ignorePresets": [
-    "docker:pinDigests"
-  ],
+  "dockerfile": {
+    "fileMatch": [
+      "(^|/)Dockerfile(\\.[^/]+)?$"
+    ]
+  },
   "prHourlyLimit": 4,
   "automerge": true,
   "platformAutomerge": true,
@@ -17,9 +19,8 @@
   ],
   "packageRules": [
     {
-      "description": "Pin production Dockerfile images by digest and merge after CI passes",
+      "description": "Pin all Dockerfile images by digest and merge after CI passes",
       "matchManagers": ["dockerfile"],
-      "matchFileNames": ["/^Dockerfile$/"],
       "pinDigests": true,
       "platformAutomerge": false
     },
