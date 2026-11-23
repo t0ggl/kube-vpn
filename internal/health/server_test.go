@@ -14,7 +14,7 @@ import (
 
 func TestHealthEndpointsLifecycle(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	srv := NewServer(":0", "wg0", func() ([]wireguard.PeerStats, error) {
+	srv := NewServer(":0", "v0.2.0", "wg0", func() ([]wireguard.PeerStats, error) {
 		return []wireguard.PeerStats{{Endpoint: "139.28.218.237:1637"}}, nil
 	}, logger)
 	srv.SetBackend("kernel")
@@ -44,7 +44,7 @@ func TestHealthEndpointsLifecycle(t *testing.T) {
 	if err := json.NewDecoder(rec.Body).Decode(&snap); err != nil {
 		t.Fatalf("decode /status: %v", err)
 	}
-	if !snap.Ready || !snap.Healthy || snap.Backend != "kernel" || len(snap.Peers) != 1 {
+	if !snap.Ready || !snap.Healthy || snap.Version != "v0.2.0" || snap.Backend != "kernel" || len(snap.Peers) != 1 {
 		t.Errorf("unexpected status snapshot: %+v", snap)
 	}
 

@@ -259,6 +259,7 @@ PersistentKeepalive = 5
 			t.Fatalf("GET /status failed: %v (%s)", err, statusRaw)
 		}
 		var st struct {
+			Version string `json:"version"`
 			Ready   bool   `json:"ready"`
 			Healthy bool   `json:"healthy"`
 			Backend string `json:"backend"`
@@ -266,7 +267,7 @@ PersistentKeepalive = 5
 		if err := json.Unmarshal([]byte(statusRaw), &st); err != nil {
 			t.Fatalf("unmarshal /status: %v (%s)", err, statusRaw)
 		}
-		if !st.Ready || !st.Healthy || st.Backend != "kernel" {
+		if !st.Ready || !st.Healthy || st.Backend != "kernel" || st.Version != "dev" {
 			t.Fatalf("unexpected /status: %+v", st)
 		}
 

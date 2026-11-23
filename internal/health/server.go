@@ -16,6 +16,7 @@ import (
 
 // StatusSnapshot is returned by GET /status.
 type StatusSnapshot struct {
+	Version        string                `json:"version,omitempty"`
 	Ready          bool                  `json:"ready"`
 	Healthy        bool                  `json:"healthy"`
 	Backend        string                `json:"backend"`
@@ -30,6 +31,7 @@ type StatusSnapshot struct {
 // Server serves /readyz, /healthz, and /status for Kubernetes probes and observability.
 type Server struct {
 	mu        sync.RWMutex
+	version   string
 	ready     bool
 	healthy   bool
 	lastCheck time.Time
@@ -43,8 +45,9 @@ type Server struct {
 }
 
 // NewServer creates a new health HTTP server bound to addr.
-func NewServer(addr, ifaceName string, statsFn func() ([]wireguard.PeerStats, error), logger *slog.Logger) *Server {
+func NewServer(addr, version, ifaceName string, statsFn func() ([]wireguard.PeerStats, error), logger *slog.Logger) *Server {
 	s := &Server{
+		version:   version,
 		ifaceName: ifaceName,
 		startedAt: time.Now().UTC(),
 		statsFn:   statsFn,
@@ -135,6 +138,7 @@ func (s *Server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
 func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 	s.mu.RLock()
 	snap := StatusSnapshot{
+		Version:       s.version,
 		Ready:         s.ready,
 		Healthy:       s.healthy,
 		Backend:       s.backend,
