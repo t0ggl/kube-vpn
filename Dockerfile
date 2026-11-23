@@ -8,23 +8,26 @@ RUN apk add --no-cache make
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY . .
+COPY Makefile ./
+COPY cmd ./cmd
+COPY internal ./internal
 
 ARG TARGETOS=linux
 ARG TARGETARCH
-ARG VERSION=dev
 
-RUN GOOS="${TARGETOS}" GOARCH="${TARGETARCH}" make build BIN_DIR=/out VERSION="${VERSION}"
-
-FROM alpine:3.24.4@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf AS certs
-RUN apk add --no-cache ca-certificates
+RUN GOOS="${TARGETOS}" GOARCH="${TARGETARCH}" make build BIN_DIR=/out
 
 FROM scratch
 
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /out/kube-vpn /kube-vpn
 
 EXPOSE 9999
+
+ARG VERSION=dev
+COPY <<EOF /version
+${VERSION}
+EOF
 
 # Container runs as root by default to manage network interfaces, policy routes, and nftables inside the pod netns.
 # nosemgrep: dockerfile.security.missing-user-entrypoint.missing-user-entrypoint

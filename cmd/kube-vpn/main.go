@@ -7,6 +7,7 @@ import (
 	"net/netip"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -28,6 +29,11 @@ func main() {
 	}
 
 	logger := newLogger(cfg.LogLevel)
+	if b, err := os.ReadFile("/version"); err == nil {
+		if v := strings.TrimSpace(string(b)); v != "" {
+			version = v
+		}
+	}
 	logger.Info("starting kube-vpn",
 		"version", version,
 		"interface", cfg.WGInterface,
