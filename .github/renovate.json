@@ -4,8 +4,8 @@
     "config:best-practices"
   ],
   "dockerfile": {
-    "fileMatch": [
-      "(^|/)Dockerfile(\\.[^/]+)?$"
+    "managerFilePatterns": [
+      "/(^|/)Dockerfile(\\.[^/]+)?$/"
     ]
   },
   "prHourlyLimit": 4,
