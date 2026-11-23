@@ -60,8 +60,8 @@ func TestBuildRulesCount(t *testing.T) {
 	}
 
 	outRules := buildOutputRules(tbl, outChain, p)
-	// lo + ct + wg0 + 1 endpoint + 2 dns (udp+tcp) + 2 bypass (0.0.0.0/0 skipped) = 8
-	if len(outRules) != 8 {
-		t.Errorf("got %d output rules, want 8", len(outRules))
+	// lo + ct + icmpv6 + wg0 + 1 endpoint + 2 dns (udp+tcp) + 2 bypass (0.0.0.0/0 skipped) = 9
+	if len(outRules) != 9 {
+		t.Errorf("got %d output rules, want 9", len(outRules))
 	}
 }
