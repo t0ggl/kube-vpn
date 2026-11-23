@@ -3,6 +3,5 @@
 bin
 examples
 scripts
-test
 *.md
 LICENSE
